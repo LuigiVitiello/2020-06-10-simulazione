@@ -5,8 +5,10 @@
 package it.polito.tdp.imdb;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Actor;
 import it.polito.tdp.imdb.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnSimulazione; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGenere"
-    private ComboBox<?> boxGenere; // Value injected by FXMLLoader
+    private ComboBox<String> boxGenere; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAttore"
-    private ComboBox<?> boxAttore; // Value injected by FXMLLoader
+    private ComboBox<Actor> boxAttore; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtGiorni"
     private TextField txtGiorni; // Value injected by FXMLLoader
@@ -49,16 +51,55 @@ public class FXMLController {
     @FXML
     void doAttoriSimili(ActionEvent event) {
 
+    	Actor a = this.boxAttore.getValue();
+    	if(a==null) {
+    		this.txtResult.setText("Scegliere un attore");
+    		return ;
+    	}
+    	if(this.model.getGrafo()==null) {
+    		this.txtResult.setText("Creare il  grafo prima!");
+    		return ;
+    	}
+    	List<Actor> attori= this.model.raggiungibili(a);
+    	for(Actor aa: attori) {
+    		this.txtResult.appendText(aa.toString()+"\n");
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
 
+    	String gen = this.boxGenere.getValue();
+    	if(gen==null) {
+    		this.txtResult.setText("Scegliere un genere");
+    		return ;
+    	}
+    	
+    	this.model.creaGrafo(gen);
+    	this.txtResult.setText("Grafo creato!\n# vertici: "+this.model.getNVertici()+"\n# archi: "+this.model.getNArchi());
+        this.boxAttore.getItems().addAll(this.model.getVertici());
     }
 
     @FXML
     void doSimulazione(ActionEvent event) {
 
+    	int ng=0 ;
+    	try {
+    		ng = Integer.parseInt(this.txtGiorni.getText());
+    	}catch(NumberFormatException ne) {
+    		ne.printStackTrace();
+    		return ;
+    	}
+    	if(this.model.getGrafo()==null) {
+    		this.txtResult.setText("Creare il  grafo prima!");
+    		return ;
+    	}
+    	int p=this.model.simula(ng);
+    	this.txtResult.appendText("Pause: "+p+"\n");
+    	for(Actor a : this.model.getIntervist()) {
+    	    this.txtResult.appendText(a.getFirstName()+" "+a.getLastName()+" "+a.getGender()+"\n");
+    	}
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -75,5 +116,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	this.boxGenere.getItems().setAll(this.model.getGeneri());
     }
 }
