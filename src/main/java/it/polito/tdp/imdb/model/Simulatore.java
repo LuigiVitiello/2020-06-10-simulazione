@@ -182,7 +182,7 @@ public class Simulatore {
 		int max=0;
 		Actor best=null;
 		for (Actor a : Graphs.neighborListOf(grafo, actor)) {
-			int grado= grafo.degreeOf(a);
+			int grado= (int)grafo.getEdgeWeight(grafo.getEdge(actor, a));
 			if (grado>max && this.daIntervistare.contains(a)) {
 				max=grado;
 				best=a;
